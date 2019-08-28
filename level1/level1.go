@@ -13,23 +13,40 @@ func main() {
 	fmt.Println(sumUpValues(inputs))
 }
 
-func sumUpValues(inputs []string) int {
+func sumUpValues(inputs []string) (int, int) {
 	result := 0
-	for _, input := range inputs {
-		if len(input) == 0 {
-			break
+	alreadyOccuredState := make(map[int]bool)
+	alreadyOccuredState[0] = true
+	firstOccurence := 0
+	found := false
+	for i := 0; !found;i++ {
+		if i == len(inputs) {
+			i = 0
 		}
-		toInt, err := strconv.Atoi(input[1:])
-		if err != nil {
-			panic(err)
+		if len(inputs[i]) == 0 {
+			continue
 		}
-		if input[0] == 43 {
-			result += toInt
+		result = addToResult(result, inputs[i])
+		if alreadyOccuredState[result] {
+			firstOccurence = result
+			found = true
 		} else {
-			result -= toInt
+			alreadyOccuredState[result] = true
 		}
 	}
-	return result
+	return result, firstOccurence
+}
+
+func addToResult(result int, toAdd string) int {
+	toInt, err := strconv.Atoi(toAdd[1:])
+	if err != nil {
+		panic(err)
+	}
+	if toAdd[0] == 45 {
+		toInt *= -1
+	}
+
+	return result + toInt
 }
 
 func readAndSplitFile(filename string) []string {
