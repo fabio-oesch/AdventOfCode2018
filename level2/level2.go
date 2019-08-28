@@ -9,6 +9,47 @@ import (
 func main() {
 	filename := "testinput.txt"
 	inputs := readAndSplitFile(filename)
+	fmt.Println(getSimilarStrings(inputs))
+}
+
+func getSimilarStrings(inputs []string) string {
+	var remaining string
+	for i := 0; i < len(inputs); i += 1 {
+		for j := i + 1; j < len(inputs); j += 1 {
+			remaining = getRemaining(inputs[i], inputs[j])
+			if remaining != "" {
+				return remaining
+			}
+		}
+	}
+	panic("No similar ones found")
+}
+
+func differsByOneChar(s1 string, s2 string) (bool, int) {
+	differByOne := true
+	pos := -1
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			if differByOne {
+				differByOne = false
+				pos = i
+			} else {
+				return false, -1
+			}
+		}
+	}
+	return true, pos
+}
+
+func getRemaining(s1 string, s2 string) string {
+	differsByOne, pos := differsByOneChar(s1, s2)
+	if differsByOne {
+		return s1[:pos] + s1[pos + 1:]
+	}
+	return ""
+}
+
+func containsTwoAndThreeOfSameLetter(inputs []string) {
 	containsTwo := 0
 	containsThree := 0
 	for _, input := range inputs {
