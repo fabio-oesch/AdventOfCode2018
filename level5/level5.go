@@ -13,8 +13,6 @@ func main() {
 	input := readAndSplitFile(filename)[0]
 	inputlength := len(input)
 	for i := 0; i < inputlength-1; i += 1 { // 'a' = 97, 'A' = 65
-		fmt.Println(len(input), i)
-		//fmt.Println(sub(input[i],input[i+1]), input[i], input[i+1])
 		if sub(input[i], input[i+1]) == 32 {
 			input = input[:i] + input[i+2:]
 			if i > 0 {
