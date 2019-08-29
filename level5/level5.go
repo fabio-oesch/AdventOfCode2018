@@ -11,6 +11,14 @@ import (
 func main() {
 	filename := "input.txt"
 	input := readAndSplitFile(filename)[0]
+	for i := 65; i < 91; i++ {
+		tempstring := strings.ReplaceAll(input, string(byte(i)), "")
+		tempstring = strings.ReplaceAll(tempstring, string(byte(i + 32)), "")
+		react(tempstring)
+	}
+}
+
+func react(input string) {
 	inputlength := len(input)
 	for i := 0; i < inputlength-1; i += 1 { // 'a' = 97, 'A' = 65
 		if sub(input[i], input[i+1]) == 32 {
