@@ -3,24 +3,45 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"strings"
 	"sort"
 	"strconv"
+	"strings"
 )
-
 
 func main() {
 	filename := "input.txt"
 	inputs := readAndSplitFile(filename)
 	sortTimes(inputs)
 	guardsSleepSchedule := totalSleepTimePerGuard(inputs)
+	for k, v := range guardsSleepSchedule {
+		fmt.Println(k, v)
+	}
+	mostSleptTime(guardsSleepSchedule)
+}
+
+func firstStar(guardsSleepSchedule map[int][]int) {
 	sleepiestguard := getLongestSleepingGuard(guardsSleepSchedule)
-	mostSleptAt := getTimeMostSleptAt(guardsSleepSchedule, sleepiestguard)
-	fmt.Println(sleepiestguard, mostSleptAt, sleepiestguard * mostSleptAt)
+	_, mostSleptAt := getTimeMostSleptAt(guardsSleepSchedule, sleepiestguard)
+	fmt.Println(sleepiestguard, mostSleptAt, sleepiestguard*mostSleptAt)
 }
 
 func sortTimes(inputs []string) {
 	sort.Strings(inputs)
+}
+
+func mostSleptTime(guardsSleep map[int][]int) {
+	mostSleptTime := -1
+	guardMostSleptTime := 0
+	timeAt := 0
+	for k := range guardsSleep {
+		currentSleep, currentTimeAt := getTimeMostSleptAt(guardsSleep, k)
+		if currentSleep > mostSleptTime {
+			mostSleptTime = currentSleep
+			guardMostSleptTime = k
+			timeAt = currentTimeAt
+		}
+	}
+	fmt.Println(mostSleptTime, guardMostSleptTime, timeAt*guardMostSleptTime)
 }
 
 func getLongestSleepingGuard(guardsSleep map[int][]int) int {
@@ -39,7 +60,7 @@ func getLongestSleepingGuard(guardsSleep map[int][]int) int {
 	return maxSleepingGuard
 }
 
-func getTimeMostSleptAt(guardsSleep map[int][]int, guard int) int {
+func getTimeMostSleptAt(guardsSleep map[int][]int, guard int) (int, int) {
 	mostSleptAt := -1
 	var timeMostSleptAt int
 	for i, v := range guardsSleep[guard] {
@@ -48,7 +69,7 @@ func getTimeMostSleptAt(guardsSleep map[int][]int, guard int) int {
 			timeMostSleptAt = i
 		}
 	}
-	return timeMostSleptAt
+	return mostSleptAt, timeMostSleptAt
 }
 
 func totalSleepTimePerGuard(inputs []string) map[int][]int {
@@ -67,10 +88,10 @@ func totalSleepTimePerGuard(inputs []string) map[int][]int {
 		}
 		getColonPos := strings.Index(input, ":")
 		if strings.Index(input, "falls asleep") != -1 {
-			fellAsleepAt, _ = strconv.Atoi(input[getColonPos+1:getColonPos+3])
+			fellAsleepAt, _ = strconv.Atoi(input[getColonPos+1 : getColonPos+3])
 			continue
 		}
-		wakeUpAt, _ := strconv.Atoi(input[getColonPos+1:getColonPos+3])
+		wakeUpAt, _ := strconv.Atoi(input[getColonPos+1 : getColonPos+3])
 		for i := fellAsleepAt; i < wakeUpAt; i++ {
 			sleepTime[currentGuard][i] += 1
 		}
