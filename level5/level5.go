@@ -15,13 +15,15 @@ func main() {
 	for i := 0; i < inputlength-1; i += 1 { // 'a' = 97, 'A' = 65
 		if sub(input[i], input[i+1]) == 32 {
 			input = input[:i] + input[i+2:]
-			if i > 0 {
+			if i == 0 {
+				i -= 1
+			} else {
 				i -= 2
 			}
 			inputlength = inputlength - 2
 		}
 	}
-	fmt.Println(input)
+	fmt.Println(len(input))
 }
 
 func sub(x byte, y byte) byte {
