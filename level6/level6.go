@@ -3,14 +3,15 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"strings"
-	"strconv"
 	"log"
+	"strconv"
+	"strings"
 )
 
 var devices []device
 
 var minX, minY, maxX, maxY int
+var grid [][]int
 
 type device struct {
 	x int
@@ -18,15 +19,37 @@ type device struct {
 }
 
 func main() {
-	filename := "testinput.txt"
+	filename := "input.txt"
 	inputs := readAndSplitFile(filename)
 	createDeviceSlice(inputs)
 	getMinMaxXYVals()
-	fmt.Println(devices, minX, minY, maxX, maxY)
+	prepareGrid()
+	areas := make(map[int]int)
+	for y, values := range grid {
+		for x := range values {
+			nearestDevice := findNearestDevice(x, y)
+			if (x == minX - 1 || y == minY - 1 || x == maxX + 1 || y == maxY + 1) {
+				areas[nearestDevice] = -1
+			} else if (areas[nearestDevice] != -1) {
+				areas[nearestDevice] += 1
+			}
+		}
+	}
+	fmt.Println(largestArea(areas))
 }
 
 func manhattenDistance(a device, b device) int {
-	return abs(a.x - b.x) + abs(a.y - b.y)
+	return abs(a.x-b.x) + abs(a.y-b.y)
+}
+
+func largestArea(areas map[int]int) int {
+	largestArea := -1
+	for _, v := range areas {
+		if v > largestArea {
+			largestArea = v
+		}
+	}
+	return largestArea
 }
 
 func abs(x int) int {
@@ -34,6 +57,30 @@ func abs(x int) int {
 		x = -x
 	}
 	return x
+}
+
+func findNearestDevice(x int, y int) int {
+	smallestDist := 10000
+	deviceNumberOfSmallestDist := 0
+	tempDevice := device{x, y}
+	for i, device := range devices {
+		currentDist := manhattenDistance(tempDevice, device)
+		if currentDist == smallestDist {
+			deviceNumberOfSmallestDist = -1
+		}
+		if currentDist < smallestDist {
+			smallestDist = currentDist
+			deviceNumberOfSmallestDist = i
+		}
+	}
+	return deviceNumberOfSmallestDist
+}
+
+func prepareGrid() {
+	limitX, limitY := maxX-minX+3, maxY-minY+3
+	for i := 0; i < limitY; i += 1 {
+		grid = append(grid, make([]int, limitX))
+	}
 }
 
 func getMinMaxXYVals() {
@@ -58,7 +105,7 @@ func getMinMaxXYVals() {
 }
 
 func createDeviceSlice(inputs []string) {
-	for _,input := range inputs {
+	for _, input := range inputs {
 		splitInput := strings.Split(input, ", ")
 		tempX, err := strconv.Atoi(splitInput[0])
 		if err != nil {
