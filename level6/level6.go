@@ -23,14 +23,27 @@ func main() {
 	inputs := readAndSplitFile(filename)
 	createDeviceSlice(inputs)
 	getMinMaxXYVals()
+	limit, area := 10000, 0
+	for y := minY - 1; y < maxY+2; y += 1 {
+		for x := minX - 1; x < maxX+2; x += 1 {
+			if distanceToAllDevices(x, y) < limit {
+				area += 1
+			}
+		}
+	}
+	fmt.Println(area)
+}
+
+func firstStar() {
+	getMinMaxXYVals()
 	prepareGrid()
 	areas := make(map[int]int)
 	for y, values := range grid {
 		for x := range values {
 			nearestDevice := findNearestDevice(x, y)
-			if (x == minX - 1 || y == minY - 1 || x == maxX + 1 || y == maxY + 1) {
+			if x == minX-1 || y == minY-1 || x == maxX+1 || y == maxY+1 {
 				areas[nearestDevice] = -1
-			} else if (areas[nearestDevice] != -1) {
+			} else if areas[nearestDevice] != -1 {
 				areas[nearestDevice] += 1
 			}
 		}
@@ -40,6 +53,14 @@ func main() {
 
 func manhattenDistance(a device, b device) int {
 	return abs(a.x-b.x) + abs(a.y-b.y)
+}
+
+func distanceToAllDevices(x int, y int) int {
+	sum := 0
+	for _, d := range devices {
+		sum += manhattenDistance(device{x, y}, d)
+	}
+	return sum
 }
 
 func largestArea(areas map[int]int) int {
