@@ -21,7 +21,17 @@ func main() {
 	var result strings.Builder
 	createHierarchy(inputs, &inst)
 	root := getRoot(inst)
-	result.WriteString(root.name)
+	nextInst := instructions{root}
+	for len(nextInst) > 0 {
+		//fmt.Println(root.name, nextInst)
+		result.WriteString(root.name)
+		fmt.Println("before:", nextInst, root.name)
+		next := nextInst.getNextInst()
+		fmt.Println("during:", nextInst, next.name)
+		nextInst.add(root.precedes)
+		fmt.Println("after:", nextInst)
+		root = next
+	}
 	fmt.Println(result.String())
 }
 
@@ -29,10 +39,28 @@ func createHierarchy(inputs []string, inst *instructions) {
 	for _, input := range inputs {
 		split := strings.Fields(input)
 		parentInst := inst.find(split[1]) // where the parent sits
-		childInst := inst.find(split[7]) // where the child sits
+		childInst := inst.find(split[7])  // where the child sits
 		childInst.follows = parentInst
 		parentInst.precedes = append(parentInst.precedes, childInst)
 	}
+}
+
+func (inst *instructions) getNextInst() *instruction {
+	var nextInst *instruction
+	var nextInstIndex int
+	for index, i := range *inst {
+		if nextInst == nil {
+			nextInst = i
+			nextInstIndex = index
+			continue
+		}
+		if i.name < nextInst.name {
+			nextInst = i
+			nextInstIndex = index
+		}
+	}
+	*inst = append((*inst)[:nextInstIndex], (*inst)[nextInstIndex+1:]...)
+	return nextInst
 }
 
 func getRoot(inst instructions) *instruction {
@@ -51,7 +79,7 @@ func (inst *instructions) find(name string) *instruction {
 			}
 		}
 	}
-	return inst.add(name)
+	return inst.create(name)
 }
 
 func (inst instructions) exists(name string) bool {
@@ -63,7 +91,11 @@ func (inst instructions) exists(name string) bool {
 	return false
 }
 
-func (inst *instructions) add(name string) *instruction {
+func (inst *instructions) add(i []*instruction) {
+	*inst = append(*inst, i...)
+}
+
+func (inst *instructions) create(name string) *instruction {
 	i := instruction{name, nil, nil}
 	*inst = append(*inst, &i)
 	return &i
