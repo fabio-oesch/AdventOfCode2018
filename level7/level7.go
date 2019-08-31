@@ -18,38 +18,40 @@ func main() {
 	filename := "testinput.txt"
 	inputs := readAndSplitFile(filename)
 	inst := instructions{}
-	for _, input := range inputs {
-		split := strings.Fields(input)
-		parent := split[1]
-		child := split[7]
-		var parentInst *instruction
-		var childInst *instruction
-		if inst.exists(parent) {
-			parentInst = inst.find(parent)
-		} else {
-			parentInst = inst.add(parent)
-		}
-		if inst.exists(child) {
-			childInst = inst.find(child)
-		} else {
-			childInst = inst.add(child)
-		}
-		childInst.follows = parentInst
-		parentInst.precedes = append(parentInst.precedes, childInst)
-		fmt.Println(inst)
-	}
-	//instructions := make(map[string]instruction)
-	//createHierarchy(inputs, instructions)
-	fmt.Println(inst[0].name)
+	var result strings.Builder
+	createHierarchy(inputs, &inst)
+	root := getRoot(inst)
+	result.WriteString(root.name)
+	fmt.Println(result.String())
 }
 
-func (inst instructions) find(name string) *instruction {
-	for _, i := range inst {
-		if (*i).name == name {
-			return i
+func createHierarchy(inputs []string, inst *instructions) {
+	for _, input := range inputs {
+		split := strings.Fields(input)
+		parentInst := inst.find(split[1]) // where the parent sits
+		childInst := inst.find(split[7]) // where the child sits
+		childInst.follows = parentInst
+		parentInst.precedes = append(parentInst.precedes, childInst)
+	}
+}
+
+func getRoot(inst instructions) *instruction {
+	currentRoot := inst[0]
+	for currentRoot.follows != nil {
+		currentRoot = currentRoot.follows
+	}
+	return currentRoot
+}
+
+func (inst *instructions) find(name string) *instruction {
+	if inst.exists(name) {
+		for _, i := range *inst {
+			if (*i).name == name {
+				return i
+			}
 		}
 	}
-	return nil
+	return inst.add(name)
 }
 
 func (inst instructions) exists(name string) bool {
